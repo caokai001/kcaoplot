@@ -1,0 +1,39 @@
+Package: kcaoplot
+Type: Package
+Title: some skill for me  (Title Case)
+Version: 0.1.0
+Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: What the package does (one paragraph).
+Depends:
+    R (>= 3.4.0)
+biocViews:
+Imports:
+  ggplot2,
+  dplyr,
+  TxDb.Hsapiens.UCSC.hg19.knownGene,
+  rtracklayer, 
+  AnnotationHub,
+  Rsamtools,
+  Biostrings,
+  IRanges,
+  readr,
+  GenomicRanges,
+  S4Vectors,
+  S4Vectors,
+  S4Vectors,
+  Rsamtools
+Suggests:
+  org.Hs.eg.db,
+  knitr,
+  rmarkdown
+Remotes:
+    caokai001/kcaoplot
+URL: https://caokai001.github.io/kcaoplot/
+BugReports: https://github.com/caokai001/kcaoplot/issues
+VignetteBuilder: knitr
+ByteCompile: false
+License: Artistic-2.0
+Encoding: UTF-8
+biocViews: WGS, Software, Visualization, Mutataion,Snp
+RoxygenNote: 7.0.0
