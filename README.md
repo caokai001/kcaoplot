@@ -101,8 +101,6 @@ plot_mutation_loci(mut.table)
 plot_flank_5bp(motif.ovl,somatic_gastric)
 ```
 
-<<<<<<< HEAD
 <img src="https://upload-images.jianshu.io/upload_images/9589088-45f2283c607b2157.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" style="zoom: 67%;" />
-=======
-<img src="https://upload-images.jianshu.io/upload_images/9589088-45f2283c607b2157.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" style="zoom: 67%;" />
->>>>>>> d47606c6f9c4fcbfee5d37b391c8c5fe3d5fe782
+
+
