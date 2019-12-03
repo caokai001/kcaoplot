@@ -80,10 +80,8 @@ dnase.peak<-bed2GRanges("E094-DNase.all.peaks.v2.bed")
 dnase.fdr<-bed2GRanges("E094-DNase.fdr0.01.peaks.v2.bed")
 dnase.mac<-bed2GRanges("E094-DNase.macs2.narrowPeak")
 dnase=c(dnase.peak,dnase.fdr,dnase.mac)
-<<<<<<< HEAD
-=======
+# 取并集
 library(GenomicRanges)
->>>>>>> d47606c6f9c4fcbfee5d37b391c8c5fe3d5fe782
 dnase=reduce(dnase)
 # 读入snp信息
 somatic_gastric<-bed2GRanges("41467_2018_3828_MOESM6_ESM.txt",header=TRUE)
