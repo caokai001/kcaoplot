@@ -7,7 +7,7 @@ library("parallel")
 
 ## 参数解析
 singel_TF_mutation_dir <- "/public/home/kcao/Desktop/2018_NC_GS/Jasper_tf_somatic/"
-paired_TF_mutation_dir <- "/public/home/kcao/Desktop/2018_NC_GS/paired_Jasper_tf_somatic/"
+paired_TF_mutation_dir <- "/public/home/kcao/Desktop/2018_NC_GS/Jasper_paired_tf_somatic/"
 FIMO_TF_scan_dir <- "/public/home/kcao/genome_human/hg19_fimo/motif_dir/"
 
 ## 1.读取mutation_score,选取mutation score阈值
@@ -19,7 +19,7 @@ cutoff <- as.vector(quantile(data$mutation_score, 0.8)) # 1.7
 # TF filter vector
 filter_tf <- data[data$mutation_score > cutoff,][["TF_name"]]
 # 测试3个tf 
-# filter_tf <- head(filter_tf, 3)
+filter_tf <- head(filter_tf, 10)
 
 
 ## 2.进行paired_TF_mutation_score calculate
@@ -45,7 +45,20 @@ TF_Permute_matrix <- Permute(filter_tf)
 # 改写成函数，进行mclapply计算
 #RunPairsTF <- function(i) {
 
- for (i in seq(ncol(TF_Permute_matrix))) {
+  # 4.2 开放区域合并
+  dnase.peak <- bed2GRanges("/public/home/kcao/Desktop/2018_NC_GS/TESTDATA/E094-DNase.all.peaks.v2.bed")
+  dnase.fdr <- bed2GRanges("/public/home/kcao/Desktop/2018_NC_GS/TESTDATA/E094-DNase.fdr0.01.peaks.v2.bed")
+  dnase.mac <- bed2GRanges("/public/home/kcao/Desktop/2018_NC_GS/TESTDATA/E094-DNase.macs2.narrowPeak")
+  dnase <- c(dnase.peak, dnase.fdr, dnase.mac)
+  dnase <- GenomicRanges::reduce(dnase)
+  # 4.3 读入snp信息
+  somatic_gastric <- bed2GRanges("/public/home/kcao/Desktop/2018_NC_GS/TESTDATA/41467_2018_3828_MOESM6_ESM.txt", header = TRUE)
+  names(mcols(somatic_gastric))[1:2] <- c("Ref", "Alt")
+  somatic_gastric$id = c(1:length(somatic_gastric))
+
+
+RunPairsTF <- function(i) {
+ # for (i in seq(ncol(TF_Permute_matrix))) {
   target_tf <- TF_Permute_matrix[1, i]
   co_factor <- TF_Permute_matrix[2, i]
   work_dir=paste0(paired_TF_mutation_dir, target_tf,"/",co_factor)
@@ -64,23 +77,14 @@ TF_Permute_matrix <- Permute(filter_tf)
   name_target.fimo <- list.files(path = path_target_tf_fimo_dir, pattern = "*.tsv")
   name_co_factor.fimo <- list.files(path = path_co_factor_fimo_dir, pattern = "*.tsv")
 
-  # 转换格式GRanges
+  # 转换格式GRanges ,cofactor.motif 换成全局变量
   target.motif <- Fimo2GRanges(paste0(path_target_tf_fimo_dir, "/", name_target.fimo),"GRanges" ) 
-  cofactor.motif <- Fimo2GRanges(paste0( path_co_factor_fimo_dir,"/",name_co_factor.fimo), "GRanges")
+  cofactor.motif <<- Fimo2GRanges(paste0( path_co_factor_fimo_dir,"/",name_co_factor.fimo), "GRanges")
 
   # warning(print(c(paste0(path_target_tf_fimo_dir, "/", name_target.fimo),"\n",paste0( path_co_factor_fimo_dir,"/",name_co_factor.fimo))))
   # warning(print(c(length(target.motif), "\t", length(cofactor.motif)))) # ok
 
-  # 4.2 开放区域合并
-  dnase.peak <- bed2GRanges("/public/home/kcao/Desktop/2018_NC_GS/TESTDATA/E094-DNase.all.peaks.v2.bed")
-  dnase.fdr <- bed2GRanges("/public/home/kcao/Desktop/2018_NC_GS/TESTDATA/E094-DNase.fdr0.01.peaks.v2.bed")
-  dnase.mac <- bed2GRanges("/public/home/kcao/Desktop/2018_NC_GS/TESTDATA/E094-DNase.macs2.narrowPeak")
-  dnase <- c(dnase.peak, dnase.fdr, dnase.mac)
-  dnase <- GenomicRanges::reduce(dnase)
-  # 4.3 读入snp信息
-  somatic_gastric <- bed2GRanges("/public/home/kcao/Desktop/2018_NC_GS/TESTDATA/41467_2018_3828_MOESM6_ESM.txt", header = TRUE)
-  names(mcols(somatic_gastric))[1:2] <- c("Ref", "Alt")
-  somatic_gastric$id = c(1:length(somatic_gastric))
+  
 
 
   # 4.4 过滤target_fimo_motif
@@ -115,7 +119,7 @@ TF_Permute_matrix <- Permute(filter_tf)
   # setwd(paste0(singel_TF_mutation_dir, "/.."))
 
   # 清理环境变量中“cofactor.motif”
-  rm(list=c("cofactor.motif","motif.ovl"))  
+  # rm(list=c("cofactor.motif","motif.ovl"))  
 #}
 }
 
@@ -123,14 +127,15 @@ TF_Permute_matrix <- Permute(filter_tf)
 ########################################### 运行
 require(parallel)
 # 单核计算
-system.time({
-res <- lapply(seq(ncol(TF_Permute_matrix)), RunPairsTF);
-})
-lapply(1:3,RunPairsTF)
+# system.time({
+# res <- lapply(seq(ncol(TF_Permute_matrix)), RunPairsTF);
+# })
+# lapply(1:3,RunPairsTF)
 
 # 多核并行计算
-detectCores(logical = F)  # 8
+# detectCores(logical = F)  # 8
 mc <- getOption("mc.cores", 23)
 system.time({
 res <- mclapply(seq(ncol(TF_Permute_matrix)), RunPairsTF)
 })
+print("all work is finished")
